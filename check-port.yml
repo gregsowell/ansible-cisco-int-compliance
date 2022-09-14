@@ -1,0 +1,20 @@
+---
+- name: grab the port config
+  cisco.ios.command: "show run int {{ x.intname }}"
+  register: port_config_1
+  
+- name: set variable from template
+  when: search x.desc item
+  set_fact: 
+    port_config_2: "{{ lookup('template', item.yml) }}"
+  ignore_errors: true
+  loop: "{{ int_descs }}"
+    
+- name: if desc not matched add line to report
+  when: port_config_2 not defined
+  
+- name: do diff and write line when they differ
+  when: 
+    - port_config_2 defined
+    - port_config_1 != port_config_2
+  

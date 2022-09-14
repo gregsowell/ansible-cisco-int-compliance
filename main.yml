@@ -1,0 +1,19 @@
+---
+- name: reporting non compliance on interface configs
+  hosts: all
+  gather_facts: false
+  check_mode: true
+  vars:
+  
+  tasks:
+  - name: fail if not in check mode
+    ansible.builtin.assert: 
+      that: 
+        - check_mode
+        
+  - name: lldp to pull interface desc with all interfaces
+    register: port_info
+    
+  - name: loop through each interfaces pulling individual int config
+    include_task: check-port.yml
+    loop: "{{ port_info }}"    
