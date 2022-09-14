@@ -48,4 +48,4 @@
     loop: "{{ port_list }}"    
     loop_control:
       loop_var: port_value
-    when: port_value.value.description == 'printer'
+   # when: port_value.value.description == 'printer'
