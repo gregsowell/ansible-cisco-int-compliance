@@ -1,4 +1,4 @@
 roles:
 - name: ansible-report
-  source: https://github.com/gregsowell/ansible-report.git
-  type: git
+  src: https://github.com/gregsowell/ansible-report.git
+#  type: git
