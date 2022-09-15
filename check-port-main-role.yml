@@ -54,6 +54,6 @@
 
   - name: send the compliance email
     ansible.builtin.include_role:
-      name: csv_html_report
+      name: ansible-report
     vars: 
       action_type: email
