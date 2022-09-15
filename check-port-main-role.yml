@@ -1,5 +1,5 @@
 ---
-# uses this role https://github.com/gregsowell/ansible-report/tree/main/csv_html_report
+# uses this role https://github.com/gregsowell/ansible-report
 - name: reporting non compliance on interface configs
   hosts: csr1000v
   gather_facts: false
@@ -19,7 +19,7 @@
 #      that: 
 #        - check_mode == true
         
-  - name: lldp to pull interface desc with all interfaces
+  - name: use ios facts to grab interface desc with all interfaces
     cisco.ios.ios_facts:
       gather_subset:
         - interfaces
@@ -31,7 +31,7 @@
         # - interfaces
     register: port_info
 
-  - name: set it as list
+  - name: make the collected info a list for looping over
     set_fact:
       port_list: "{{ port_info.ansible_facts.ansible_net_interfaces | dict2items }}"
 
@@ -45,7 +45,7 @@
 #    loop: "{{ port_list }}"
 #    when: item.value.description == 'printer'
 
-  - name: loop through each interface pulling individual int config
+  - name: loop through each interface and do the compliance checking.  This calls another task file for the work.
     include_tasks: check-port-role.yml
     loop: "{{ port_list }}"    
     loop_control:
