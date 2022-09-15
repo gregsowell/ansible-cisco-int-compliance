@@ -33,7 +33,7 @@
 - name: if desc not matched add line to report
   when: port_config_2 == 'notfound'
   ansible.builtin.include_role:
-    name: csv_html_report
+    name: ansible-report
   vars: 
     action_type: write
     write_line: "{{ inventory_hostname }},int desc mismatch,{{ port_config_1.stdout[0] | trim }}"
@@ -41,7 +41,7 @@
 - name: do diff and write line when they differ
   when: port_config_1.stdout[0] | trim != port_config_2 | default('none') | trim and port_config_2 != 'notfound'
   ansible.builtin.include_role:
-    name: csv_html_report
+    name: ansible-report
   vars: 
     action_type: write
     write_line: "{{ inventory_hostname }},config mismatch,{{ port_config_1.stdout[0] | trim }}"
