@@ -1,0 +1,55 @@
+---
+- name: grab the port config
+  cisco.ios.command: 
+    commands: "show run int {{ port_value.key }} | b interface"
+  register: port_config_1
+
+- name: varuable cleandup
+  set_fact: 
+    port_config_1: "{{ port_config_1 | regex_replace('end') | trim}}"
+
+- name: set variable to notfound
+  set_fact: 
+    port_config_2: notfound
+
+- name: set variable from template
+  when: port_value.value.description is search(item) 
+  set_fact: 
+    port_config_2: "{{ lookup('template', item + '.yml') }}"
+#  ignore_errors: true
+  loop: "{{ int_descs }}"
+    
+#- name: if desc not matched add line to report
+#  debug: 
+#    msg: "int desc not correct"
+#  when: port_config_2 is not defined
+  
+#- name: do diff and write line when they differ
+#  debug:
+#    msg: "configs don't match - not compliant"
+#  when: 
+#    - port_config_1.stdout[0] | trim != port_config_2 | default('none')
+
+- name: if desc not matched add line to report
+  when: port_config_2 == 'notfound'
+  ansible.builtin.include_role:
+    name: csv_html_report
+  vars: 
+    action_type: write
+    write_line: "{{ inventory_hostname }},int desc mismatch,{{ port_config_1.stdout[0] | trim }}"
+  
+- name: do diff and write line when they differ
+  when: port_config_1.stdout[0] | trim != port_config_2 | default('none') | trim and port_config_2 != 'notfound'
+  ansible.builtin.include_role:
+    name: csv_html_report
+  vars: 
+    action_type: write
+    write_line: "{{ inventory_hostname }},config mismatch,{{ port_config_1.stdout[0] | trim }}"
+  
+#- name: deibg port config1
+#  debug:
+#    var: port_config_1.stdout[0] | trim
+
+#- name: deibg port config2
+#  debug:
+#    var: port_config_2 | trim

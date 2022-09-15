@@ -1,0 +1,58 @@
+---
+- name: reporting non compliance on interface configs
+  hosts: csr1000v
+  gather_facts: false
+  vars:
+    int_descs: 
+      - adminuser
+      - mfguser
+      - printer
+      - ap
+      - uplink
+
+    headers: Hostname,reason,config
+
+  tasks:
+#  - name: fail if not in check mode
+#    ansible.builtin.assert: 
+#      that: 
+#        - check_mode == true
+        
+  - name: lldp to pull interface desc with all interfaces
+    cisco.ios.ios_facts:
+      gather_subset:
+        - interfaces
+#        - '!all'
+#        - '!min'
+#        - 'min'
+      gather_network_resources:
+        - l2_interfaces
+        # - interfaces
+    register: port_info
+
+  - name: set it as list
+    set_fact:
+      port_list: "{{ port_info.ansible_facts.ansible_net_interfaces | dict2items }}"
+
+#  - name: debug 1
+#    debug:
+#      var: test_var
+
+#  - name: debug
+#    debug:
+#      msg: "{{ item.key }} with description {{ item.value.description | default('none') }}"
+#    loop: "{{ port_list }}"
+#    when: item.value.description == 'printer'
+
+  - name: loop through each interface pulling individual int config
+    include_tasks: check-port-role.yml
+    loop: "{{ port_list }}"    
+    loop_control:
+      loop_var: port_value
+#    when: port_value.value.description == 'printer'
+
+  - name: send the compliance email
+    ansible.builtin.include_role:
+      name: csv_html_report
+    vars: 
+      action_type: email
