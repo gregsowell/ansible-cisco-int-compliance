@@ -2,7 +2,6 @@
 - name: reporting non compliance on interface configs
   hosts: rtr1
   gather_facts: false
-  check_mode: true
   vars:
     int_descs: 
       - adminuser
