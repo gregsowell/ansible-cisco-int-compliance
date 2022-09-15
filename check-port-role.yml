@@ -1,18 +1,18 @@
 ---
-- name: grab the port config
+- name: grab the port config and save to variable
   cisco.ios.command: 
     commands: "show run int {{ port_value.key }} | b interface"
   register: port_config_1
 
-- name: varuable cleandup
+- name: variable clean up.  It has some undesirable stuff in.
   set_fact: 
     port_config_1: "{{ port_config_1 | regex_replace('end') | trim}}"
 
-- name: set variable to notfound
+- name: pre populate the port config 2 variable
   set_fact: 
     port_config_2: notfound
 
-- name: set variable from template
+- name: loop through description types and once found, set the port config 2 via the template of that name.
   when: port_value.value.description is search(item) 
   set_fact: 
     port_config_2: "{{ lookup('template', item + '.yml') }}"
@@ -30,7 +30,7 @@
 #  when: 
 #    - port_config_1.stdout[0] | trim != port_config_2 | default('none')
 
-- name: if desc not matched add line to report
+- name: if desc not matched (it's not set properly) add line to report
   when: port_config_2 == 'notfound'
   ansible.builtin.include_role:
     name: ansible-report
@@ -38,7 +38,7 @@
     action_type: write
     write_line: "{{ inventory_hostname }},int desc mismatch,{{ port_config_1.stdout[0] | trim }}"
   
-- name: do diff and write line when they differ
+- name: if the desc is correct, but the config doesn't match the template, add a line to report
   when: port_config_1.stdout[0] | trim != port_config_2 | default('none') | trim and port_config_2 != 'notfound'
   ansible.builtin.include_role:
     name: ansible-report
