@@ -1,7 +1,8 @@
-interface {{ port_value.key }}
- description printer
+interface GigabitEthernet2
+ description ap
  no ip address
  shutdown
  negotiation auto
  no mop enabled
  no mop sysid
+ NotInInterface
