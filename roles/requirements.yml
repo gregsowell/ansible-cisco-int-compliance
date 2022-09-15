@@ -1,0 +1,3 @@
+roles:
+- name: ansible-report
+  source: https://github.com/gregsowell/ansible-report
