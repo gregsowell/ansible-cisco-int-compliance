@@ -12,6 +12,7 @@
       - uplink
 
     headers: Hostname,reason,config
+    email_subject: Interface Noncompliance Report
 
   tasks:
 #  - name: fail if not in check mode
